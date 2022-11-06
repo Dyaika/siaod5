@@ -22,30 +22,30 @@ public:
 	SearchTree(int n = 0);
 	~SearchTree();
 	bool isEmpty() {
-		if (size == 0) {
-			return true;
+		if (root) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 	void createFromFile(fstream& b);
 	void clearTree();
 	void add(int key, int offset);
 	int findByKey(int key);
-	bool deleteByKey(int key);
+	void deleteByKeyS(int key);
 	void printTree();
 	static void test();
 private:
 	//поле корн€
 	Node* root = nullptr;
 	//поле количества €чеек
-	int size = 0;
+	//int size = 0;
 
 	//добавл€ет узел
 	Node* addNode(int key, int offset, Node* root);
 	//ищет узел по ключу
 	int findNode(int key, Node* root);
 	//удал€ет узел по улючу
-	bool deleteNode(int key, Node* root);
+	Node* deleteNode(int key, Node* root);
 	//печатает узлы
 	void printNodes(Node* root, int tab_count = 0, int tab_size = 8);
 };

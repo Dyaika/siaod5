@@ -39,15 +39,7 @@ void SearchTree::test()
 			b0.close();
 			b.open("test.dat", ios::binary | ios::out | ios::in);
 			textToBinary("test.txt", b);
-			for (int i = 0; i < data1; i++) {
-				temp = getRowBinary(b, i + 1);
-				if (temp) {
-					s.add(temp->card, i);
-				}
-				else {
-					cout << "log1\n";
-				}
-			}
+			s.createFromFile(b);
 			cout << "---completed---\n";
 			break;
 		case 2:
@@ -87,16 +79,13 @@ void SearchTree::test()
 		case 4:
 			cout << "Key to delete: ";
 			cin >> data1;
-			if (s.deleteByKey(data1)) {
-				cout << "Deleted from tree ";
-				if (b.is_open()) {
-					cout << "UNDER DEVELOPMENT";
-				}
-				cout << "\n";
+			s.deleteByKeyS(data1); 
+			cout << "Now tree";
+			if (b.is_open()) {
+				deleteByKey(b, data1);
+				cout << " and file";
 			}
-			else {
-				cout << "not found\n";
-			}
+			cout << " does not have key=" << data1 << "\n";
 			cout << "---completed---\n";
 			break;
 		case 5:
@@ -150,10 +139,44 @@ int SearchTree::findNode(int key, Node* root)
 	return res;
 }
 
-bool SearchTree::deleteNode(int key, Node* root)
+SearchTree::Node* SearchTree::deleteNode(int key, Node* root)
 {
-	cout << "UNDER DEVELOPMENT\n";
-	return false;
+	Node* res = root;
+	Node* to_delete = nullptr;
+	Node* cur = nullptr;
+	if (root) {
+		if (root->key == key) {
+			to_delete = root;
+			if (root->leftTree) {
+				if (root->rightTree) {
+					res = root->leftTree;
+					cur = res;
+					while (cur->rightTree) {
+						cur = cur->rightTree;
+					}
+					cur->rightTree = root->rightTree;
+					to_delete->leftTree = nullptr;
+					to_delete->rightTree = nullptr;
+				}
+				else {
+					res = root->leftTree;
+					to_delete->leftTree = nullptr;
+				}
+			}
+			else if (root->rightTree) {
+				res = root->rightTree;
+				to_delete->rightTree = nullptr;
+			}
+			else {
+				res = nullptr;
+			}
+			delete to_delete;
+			return res;
+		}
+		res->rightTree = deleteNode(key, root->rightTree);
+		res->leftTree = deleteNode(key, root->leftTree);
+	}
+	return res;
 }
 
 void SearchTree::printNodes(Node* root, int tab_count, int tab_size)
@@ -182,12 +205,17 @@ SearchTree::~SearchTree()
 
 void SearchTree::createFromFile(fstream& b)
 {
-	cout << "UNDER DEVELOPMENT\n";
+	int i = 0;
+	Patient *temp = getRowBinary(b, i + 1);
+	while (temp) {
+		add(temp->card, i);
+		temp = getRowBinary(b, i + 1);
+		i++;
+	}
 }
 
 void SearchTree::clearTree()
 {
-	size = 0;
 	delete root;
 	root = nullptr;
 }
@@ -195,7 +223,6 @@ void SearchTree::clearTree()
 void SearchTree::add(int key, int offset)
 {
 	root = addNode(key, offset, root);
-	size++;
 }
 
 int SearchTree::findByKey(int key)
@@ -203,9 +230,9 @@ int SearchTree::findByKey(int key)
 	return findNode(key, root);
 }
 
-bool SearchTree::deleteByKey(int key)
+void SearchTree::deleteByKeyS(int key)
 {
-	return deleteNode(key, root);
+	root = deleteNode(key, root);
 }
 
 SearchTree::Node::~Node()
