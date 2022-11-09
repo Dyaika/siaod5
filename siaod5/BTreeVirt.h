@@ -11,7 +11,7 @@ private:
 	struct Node {
 		int* keys;//ключи
 		int* offsets;//смещени€
-		int n;//количество ключей в записи
+		int n;//мин количество ключей в записи
 		Node** children;//ветки вниз
 		int count;//текущ€€ заполненность
 		bool isleaf;

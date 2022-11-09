@@ -37,6 +37,7 @@ MyApp::MyApp()
 		case 2:
 			system("cls");
 			BTreeVirt::test();
+			system("cls");
 			break;
 		case 3:
 			system("cls");
