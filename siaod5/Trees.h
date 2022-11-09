@@ -1,6 +1,6 @@
 //Trees.h
-#ifndef __BTREE_H
-#define __BTREE_H
+#ifndef __TREES_H
+#define __TREES_H
 #include <fstream>
 #include <iostream>
 #include "binary_manipulator.h"
@@ -37,8 +37,6 @@ public:
 private:
 	//поле корн€
 	Node* root = nullptr;
-	//поле количества €чеек
-	//int size = 0;
 
 	//добавл€ет узел
 	Node* addNode(int key, int offset, Node* root);
@@ -49,22 +47,54 @@ private:
 	//печатает узлы
 	void printNodes(Node* root, int tab_count = 0, int tab_size = 8);
 };
-
+/*
 class BTree
 {
-public:
-	//BTree();
-	//~BTree();
-
 private:
 	struct Node
 	{
-		int key = 0;
-		int offset = 0;
-
+		int keys[2];
+		int offsets[2];
+		Node* children[2 + 1];
+		Node* parent;
+		int count = 0;//ключей в узле
+		bool isleaf;
+		~Node();
 	};
-};
-#endif // !__BTREE_H
+public:
+	BTree(int n = 0);
+	~BTree();
+	bool isEmpty() {
+		if (root) {
+			return false;
+		}
+		return true;
+	}
+	void createFromFile(fstream& b);
+	void clearTree();
+	void add(int key, int offset);
+	int findByKey(int key);
+	void deleteByKeyS(int key);
+	void printTree();
+	static void test();
+private:
+	//поле корн€
+	Node* root = nullptr;
+
+	//добавл€ет узел
+	Node* addNode(int key, int offset, Node* root);
+	//ищет узел по ключу
+	int findNode(int key, Node* root);
+	//удал€ет узел по улючу
+	Node* deleteNode(int key, Node* root);
+	//печатает узлы
+	void printNodes(Node* root, int tab_count = 0, int tab_size = 8);
+	
+	//неосновные но используемые функции
+	//поиск листа дл€ вставки
+	Node* searchForLeaf(Node* root, int key, Node* parent, int chindex);
+};*/
+#endif // !__TREES_H
 
 
 

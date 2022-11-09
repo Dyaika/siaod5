@@ -1,6 +1,7 @@
 ﻿// siaod5.cpp
 
 #include "Trees.h"
+#include "BTreeVirt.h"
 #include <iostream>
 #include "Windows.h"
 #include "binary_manipulator.h"
@@ -35,7 +36,7 @@ MyApp::MyApp()
 			break;
 		case 2:
 			system("cls");
-			cout << "IN DEVELOPMENT\n";
+			BTreeVirt::test();
 			break;
 		case 3:
 			system("cls");

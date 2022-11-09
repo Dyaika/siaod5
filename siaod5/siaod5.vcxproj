@@ -140,11 +140,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="binary_manipulator.cpp" />
+    <ClCompile Include="BTreeVirt.cpp" />
     <ClCompile Include="Trees.cpp" />
     <ClCompile Include="siaod5.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="binary_manipulator.h" />
+    <ClInclude Include="BTreeVirt.h" />
     <ClInclude Include="Patient.h" />
     <ClInclude Include="Trees.h" />
   </ItemGroup>

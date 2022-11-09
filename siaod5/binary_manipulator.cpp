@@ -7,7 +7,7 @@ void createTextFile(string fname, int length = 0)
 	if (!tout.is_open()) {
 		tout.open(fname);
 	}
-	string doctors[5] = { "Ivanov", "Petrov", "Razshildyaev", "Archipov", "Shabalov"};
+	string doctors[5] = { "Ivanov", "Fokin", "Razshildyaev", "Archipov", "Shabalov"};
 	int* seq = new int[length];
 	for (int i = 0; i < length; i++) {
 		seq[i] = i + 1;
