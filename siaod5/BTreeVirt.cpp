@@ -117,6 +117,203 @@ BTreeVirt::Node* BTreeVirt::Node::search(int key)
 	return children[i]->search(key);
 }
 
+int BTreeVirt::Node::findIndex(int key)
+{
+	int index = 0;
+	while (index < count and keys[index] < key) {
+		++index;
+	}
+	return index;
+}
+
+void BTreeVirt::Node::remove(int key)
+{
+	int index = findIndex(key);
+
+	//есть в текущем узле
+	if (index < count and keys[index] == key) {
+		if (isleaf) {
+			removeFromLeaf(index);
+		}
+		else {
+			removeFromNonLeaf(index);
+		}
+	}
+	//нет в текущем узле
+	else {
+		if (isleaf) {
+			return;
+		}
+		bool flag = index == count;
+		if (children[index]->count < n) {
+			fill(index);
+		}
+		if (flag and index > count) {
+			children[index - 1]->remove(key);
+		}
+		else {
+			children[index]->remove(key);
+		}
+	}
+	
+}
+
+void BTreeVirt::Node::removeFromLeaf(int index)
+{
+	for (int i = index + 1; i < count; ++i) {
+		keys[i - 1] = keys[i];
+		offsets[i - 1] = offsets[i];
+	}
+	count--;
+}
+
+void BTreeVirt::Node::removeFromNonLeaf(int index)
+{
+	nodeData dat;
+	dat.key = keys[index];
+	dat.offset = offsets[index];
+
+	//если дочерний элемент, предшеств. ключу имеет не менее n элементов
+	if (children[index]->count >= n) {
+		nodeData pred = getPred(index);
+		keys[index] = pred.key;
+		offsets[index] = pred.offset;
+		children[index]->remove(pred.key);
+	}
+	//если дочерний элемент имеет менее count ключей
+	else if (children[index + 1]->count >= n) {
+		nodeData succ = getSucc(index);
+		keys[index] = succ.key;
+		offsets[index] = succ.offset;
+		children[index + 1]->remove(succ.key);
+	}
+	//если и children[index] и children[index+1] имеют меньше n элементов
+	else {
+		merge(index);
+		children[index]->remove(dat.key);
+	}
+}
+
+BTreeVirt::Node::nodeData BTreeVirt::Node::getPred(int index)
+{
+	Node* cur = children[index];
+	while (!cur->isleaf) {
+		cur = cur->children[cur->count - 1];
+	}
+	nodeData res;
+	res.key = cur->keys[cur->count - 1];
+	res.offset = cur->offsets[cur->count - 1];
+	return res;
+}
+
+BTreeVirt::Node::nodeData BTreeVirt::Node::getSucc(int index)
+{
+	Node* cur = children[index + 1];
+	while (!cur->isleaf) {
+		cur = cur->children[0];
+	}
+	nodeData res;
+	res.key = cur->keys[0];
+	res.offset = cur->offsets[0];
+	return res;
+}
+
+void BTreeVirt::Node::fill(int index)
+{
+	//если предыдущий ребенок имеет больше n-1 ключей, забираем оттуда
+	if (index != 0 and children[index - 1]->count >= n) {
+		borrowFromPrev(index);
+	}
+	//если следующий ребенок имеет больше n-1 ключей, забираем оттуда
+	else if (index != count and children[index + 1]->count >= n) {
+		borrowFromNext(index);
+	}
+	else {
+		if (index != count) {
+			merge(index);
+		}
+		else {
+			merge(index - 1);
+		}
+	}
+}
+
+void BTreeVirt::Node::borrowFromPrev(int index)
+{
+	Node* child = children[index];
+	Node* sibling = children[index - 1];
+	for (int i = child->count - 1; i >= 0; --i) {
+		child->keys[i + 1] = child->keys[i];
+		child->offsets[i + 1] = child->offsets[i];
+	}
+	if (!child->isleaf) {
+		for (int i = child->count; i >= 0; --i) {
+			child->children[i + 1] = child->children[i];
+		}
+	}
+	child->keys[0] = keys[index - 1];
+	child->offsets[0] = offsets[index - 1];
+	if (!child->isleaf) {
+		child->children[0] = sibling->children[sibling->count];
+	}
+	keys[index - 1] = sibling->keys[sibling->count];
+	offsets[index - 1] = sibling->offsets[sibling->count];
+	child->count++;
+	sibling->count--;
+}
+
+void BTreeVirt::Node::borrowFromNext(int index)
+{
+	Node* child = children[index];
+	Node* sibling = children[index + 1];
+	child->keys[child->count] = keys[index];
+	child->offsets[child->count] = offsets[index];
+	if (!child->isleaf) {
+		child->children[child->count + 1] = sibling->children[0];
+	}
+	keys[index] = sibling->keys[0];
+	offsets[index] = sibling->offsets[0];
+	for (int i = 1; i, sibling->count; ++i) {
+		sibling->keys[i - 1] = sibling->keys[i];
+		sibling->offsets[i - 1] = sibling->offsets[i];
+	}
+	if (!sibling->isleaf) {
+		for (int i = 1; i < sibling->count; ++i) {
+			sibling->children[i - 1] = sibling->children[i];
+		}
+	}
+	child->count++;
+	sibling->count--;
+}
+
+void BTreeVirt::Node::merge(int index)
+{
+	Node* child = children[index];
+	Node* sibling = children[index + 1];
+	child->keys[n - 1] = keys[index];
+	child->offsets[n - 1] = offsets[index];
+	for (int i = 0; i < sibling->count; ++i) {
+		child->keys[i + n] = sibling->keys[i];
+		child->offsets[i + n] = sibling->offsets[i];
+	}
+	if (!child->isleaf) {
+		for (int i = 0; i < sibling->count; ++i) {
+			child->children[i + n] = sibling->children[i];
+		}
+	}
+	for (int i = index + 1; i < count; ++i) {
+		keys[i - 1] = keys[i];
+		offsets[i - 1] = offsets[i];
+	}
+	for (int i = index + 2; i <= count; ++i) {
+		children[i - 1] = children[i];
+	}
+	child->count += sibling->count + 1;
+	count--;
+	sibling->children = nullptr;
+	delete sibling;
+}
+
 void BTreeVirt::createFromFile(fstream& b)
 {
 	int i = 0;
@@ -134,13 +331,18 @@ void BTreeVirt::createFromFile(fstream& b)
 
 BTreeVirt::Node::~Node() {
 	if (!isleaf) {
-		for (int i = 0; i < count + 1; i++) {
-			if (children[i]) {
-				delete children[i];
+		if (children) {
+			for (int i = 0; i < count + 1; i++) {
+				if (children[i]) {
+					delete children[i];
+				}
 			}
 		}
 	}
-	delete[] children;
+	if (children) {
+		delete[] children;
+	}
+	
 	delete[] keys;
 	delete[] offsets;
 	//cout << "~\n";
@@ -184,6 +386,26 @@ int BTreeVirt::findByKey(int key)
 		}
 	}
 	return -1;
+}
+
+void BTreeVirt::deleteByKeyB(int key)
+{
+	if (!root) {
+		return;
+	}
+	root->remove(key);
+	if (root->count == 0) {
+		Node* temp = root;
+		if (root->isleaf) {
+			root = nullptr;
+		}
+		else
+		{
+			root = root->children[0];
+			temp->children = nullptr;
+			delete temp;
+		}
+	}
 }
 
 void BTreeVirt::test()

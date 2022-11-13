@@ -15,25 +15,46 @@ private:
 		Node** children;//ветки вниз
 		int count;//текущяя заполненность
 		bool isleaf;
-		//конструктор
-		Node(int n, bool isleaf);
-		~Node();
+
+		//для получения всех данных из функций
+		struct nodeData {
+			int key = 0;
+			int offset = 0;
+		};
+
+		Node(int n, bool isleaf);//конструктор
+		~Node();//деструктор
 		void traverse();//обход
 		void insertNonFull(int key, int offset);//предполагается что текущий узел не заполнен
 		void splitChild(int index, Node* node1);//предполагается что узел полон
-		Node* search(int key);
-
+		Node* search(int key);//возвращает указатель на узел
+		int findIndex(int key);//возвращает индекс первого элемента больше или равного key
+		void remove(int key);//удаляет нужный ключ
+		void removeFromLeaf(int index);//удаление если лист
+		void removeFromNonLeaf(int index);//удаление если не лист
+		nodeData getPred(int index);//получаем предшественника ключа где он присутствует на опр. позиции
+		nodeData getSucc(int index);//получаем наследника ключа где он присутствует на опр. позиции
+		void fill(int index);//заполняет дитя на опр. позиции если у него меньше n-1 значений
+		void borrowFromPrev(int index);//перетаскивает ключ из предыдущего ребенка в определенного
+		void borrowFromNext(int index);//перетаскивает ключ из следующего ребенка в определенного
+		void merge(int index);//совмещает определенного ребенка с следующим
 	};
 
+	//поле корня
 	Node* root;
-	int n;
 
+	//для определения количества элементов в узле (2*n-1 ключей, 2*n детей)
+	int n;
+	
+	//вернет указатель на узел, содержащий этот ключ
 	Node* search(int key) {
 		if (root) {
 			return root->search(key);
 		}
 		return nullptr;
 	}
+
+	//печатает узлы
 	void printNodes(Node* root, int tab_count = 0, int tab_size = 8);
 public:
 	//проверка на пустоту дерева
@@ -75,9 +96,7 @@ public:
 	int findByKey(int key);
 	
 	//удаляет узел по ключу
-	void deleteByKeyB(int key) {
-		cout << "IN DEVELOPMENT\n";
-	}
+	void deleteByKeyB(int key);
 
 	//печатает дерево как дерево
 	void printTree() {
