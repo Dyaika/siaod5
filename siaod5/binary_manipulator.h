@@ -30,6 +30,9 @@ bool deleteByKey(fstream& b, int key);
 //создает файл только с 1 заболеванием
 void onlyPatientsWith(fstream& b, string fname, int illness);
 
+//добавляет ряд в конец
+void addRow(fstream& b, Patient* p);
+
 //меняет доктора
 void newDoctorFor(fstream& b, int* cards, int n, char doctor[16]);
 

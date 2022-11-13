@@ -208,6 +208,24 @@ void onlyPatientsWith(fstream& b, string fname, int illness)
 	b.seekg(0, ios::beg);//вернули в начало
 }
 
+void addRow(fstream& b, Patient* p)
+{
+	b.clear();
+	if (!b.is_open()) {
+		exit(30);
+	}
+	if (p == nullptr) {
+		return;
+	}
+	b.seekg(0, ios::end);//поставили в конец
+	b.write((char*)p, sizeof(Patient));
+	b.seekg(0, ios::beg);//вернули в начало
+	b.clear();
+	if (!b.good()) {
+		exit(31);
+	}
+}
+
 //назначает доктора
 void newDoctorFor(fstream& b, int* cards, int n, char doctor[16])
 {
@@ -251,6 +269,7 @@ void testBinF()
 {
 	Patient* temp = nullptr;
 	string str;
+	char doc[16];
 	cout << "Enter file name: ";
 	cin >> str;
 	int* arr;
@@ -267,8 +286,8 @@ void testBinF()
 	fstream b, btemp;
 	b.open(str + "_bin.dat", ios::binary | ios::out | ios::in);
 	cout << "File " << str << ".txt was created and filled with random notes. Empty file " << str << "_bin.dat was created.";
-	while (task > 0 and task < 8) {
-		cout << "Choose task:\n1) To binary\n2) To text\n3) Print from binary file\n4) Print row\n5) Delete by key\n6) Create new file with only illness\n7) New doctor to\n> ";
+	while (task > 0 and task < 9) {
+		cout << "Choose task:\n1) To binary\n2) To text\n3) Print from binary file\n4) Print row\n5) Delete by key\n6) Create new file with only illness\n7) New doctor to\n8) Add row\n> ";
 		cin >> task;
 		switch (task)
 		{
@@ -329,11 +348,19 @@ void testBinF()
 				cin >> arr[i];
 			}
 			cout << "Who is new doctor? ";
-			char doc[16];
 			cin >> doc;
 			newDoctorFor(b, arr, data, doc);
 			cout << "---completed---\n\n";
 			delete[] arr;
+			break;
+		case 8:
+			cout << "card illness doctor: ";
+			temp = new Patient;
+			cin >> temp->card >> temp->illness >> temp->doctor;
+			addRow(b, temp);
+			delete temp;
+			temp = nullptr;
+			cout << "---completed---\n\n";
 			break;
 		default:
 			break;

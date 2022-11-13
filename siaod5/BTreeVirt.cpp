@@ -194,9 +194,10 @@ void BTreeVirt::test()
 	Patient* temp;
 	fstream b;
 	ofstream b0;
-	cout << "Welcome to B-tree test program. Choose task:";
-	while (task < 6 and task > 0) {
-		cout << "\n1) Create from file\n2) Add element\n3) Find by key\n4) Delete from tree\n5) Print tree\n> ";
+	int next_offset = 0;
+	cout << "Welcome to B-Tree test program. Choose task:";
+	while (task < 7 and task > 0) {
+		cout << "\n1) Create from file\n2) Add element\n3) Find by key\n4) Delete from tree\n5) Print tree\n6) Close file\n> ";
 		cin >> task;
 		switch (task)
 		{
@@ -207,6 +208,13 @@ void BTreeVirt::test()
 			}
 			cout << "How much notes should it have? ";
 			cin >> data1;
+			if (data1 < 0) {
+				next_offset = 0;
+			}
+			else
+			{
+				next_offset = data1;
+			}
 			if (b.is_open()) {
 				b.close();
 			}
@@ -220,17 +228,26 @@ void BTreeVirt::test()
 			break;
 		case 2:
 			if (b.is_open()) {
-				b.close();
-				cout << "Binary file was closed. Now you can add new elements to existing tree:\n";
+				cout << "card illness doctor: ";
+				temp = new Patient;
+				cin >> temp->card >> temp->illness >> temp->doctor;
+				addRow(b, temp);
+				s.add(temp->card, next_offset);
+				next_offset++;
+				delete temp;
+				temp = nullptr;
 			}
-			cout << "key offset (-1 end of input): ";
-			cin >> data1;
-			while (data1 != -1) {
-				cin >> data2;
-				s.add(data1, data2);
+			else {
 				cout << "key offset (-1 end of input): ";
 				cin >> data1;
+				while (data1 != -1) {
+					cin >> data2;
+					s.add(data1, data2);
+					cout << "key offset (-1 end of input): ";
+					cin >> data1;
+				}
 			}
+
 			cout << "---added---\n";
 			break;
 		case 3:
@@ -262,13 +279,21 @@ void BTreeVirt::test()
 				cout << " and file";
 			}
 			cout << " does not have key=" << data1 << "\n";
-			cout << "---NOTcompleted---\n";
+			cout << "---completed---\n";
 			break;
 		case 5:
 			cout << "\n";
 			s.printTree();
 			cout << "\n---completed---\n";
 			break;
+		case 6:
+			if (b.is_open()) {
+				b.close();
+				cout << "---closed---\n";
+			}
+			else {
+				cout << "---no file---\n";
+			}
 		default:
 			if (b.is_open()) {
 				b.close();
